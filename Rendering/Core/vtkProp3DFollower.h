@@ -35,8 +35,6 @@
 #include "vtkProp3D.h"
 
 class vtkCamera;
-class vtkMapper;
-
 
 class VTKRENDERINGCORE_EXPORT vtkProp3DFollower : public vtkProp3D
 {

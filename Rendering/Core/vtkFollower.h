@@ -33,6 +33,7 @@
 #include "vtkActor.h"
 
 class vtkCamera;
+class vtkProp3DFollower;
 
 class VTKRENDERINGCORE_EXPORT vtkFollower : public vtkActor
 {
@@ -48,7 +49,7 @@ class VTKRENDERINGCORE_EXPORT vtkFollower : public vtkActor
   // Set/Get the camera to follow. If this is not set, then the follower
   // won't know who to follow.
   virtual void SetCamera(vtkCamera*);
-  vtkGetObjectMacro(Camera, vtkCamera);
+  virtual vtkCamera* GetCamera();
 
   // Description:
   // This causes the actor to be rendered. It in turn will render the actor's
@@ -79,8 +80,8 @@ protected:
   vtkFollower();
   ~vtkFollower();
 
-  vtkCamera *Camera;
   vtkActor  *Device;
+  vtkProp3DFollower *Follower;
 
 private:
   vtkFollower(const vtkFollower&);  // Not implemented.
@@ -88,9 +89,6 @@ private:
 
   // hide the two parameter Render() method from the user and the compiler.
   virtual void Render(vtkRenderer *, vtkMapper *) {}
-
-  //Internal matrices to avoid New/Delete for performance reasons
-  vtkMatrix4x4 *InternalMatrix;
 };
 
 #endif

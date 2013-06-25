@@ -141,7 +141,7 @@ void vtkAxisFollower::CalculateOrthogonalVectors(double rX[3], double rY[3],
     return;
     }
 
-  vtkMatrix4x4* cameraMatrix = this->Camera->GetViewTransformMatrix();
+  vtkMatrix4x4* cameraMatrix = this->GetCamera()->GetViewTransformMatrix();
 
   vtkCoordinate *c1Axis =  axis->GetPoint1Coordinate();
   vtkCoordinate *c2Axis =  axis->GetPoint2Coordinate();
@@ -245,7 +245,7 @@ void vtkAxisFollower::ComputeTransformMatrix(vtkRenderer *ren)
 
   // check whether or not need to rebuild the matrix
   if ( this->GetMTime() > this->MatrixMTime ||
-       (this->Camera && this->Camera->GetMTime() > this->MatrixMTime) )
+       (this->GetCamera() && this->GetCamera()->GetMTime() > this->MatrixMTime) )
     {
     this->GetOrientation();
     this->Transform->Push();
@@ -327,10 +327,10 @@ void vtkAxisFollower::ComputeRotationAndTranlation(vtkRenderer *ren, double tran
                                                    vtkAxisActor *axis)
 {
   double autoScaleFactor =
-    this->AutoScale(ren, this->Camera, this->ScreenOffset, this->Position);
+    this->AutoScale(ren, this->GetCamera(), this->ScreenOffset, this->Position);
 
   double dop[3];
-  this->Camera->GetDirectionOfProjection(dop);
+  this->GetCamera()->GetDirectionOfProjection(dop);
   vtkMath::Normalize(dop);
 
   this->CalculateOrthogonalVectors(rX, rY, rZ, axis, dop, ren);
@@ -428,17 +428,17 @@ void vtkAxisFollower::ComputerAutoCenterTranslation(
 //----------------------------------------------------------------------
 int vtkAxisFollower::TestDistanceVisibility()
 {
-  if(!this->Camera->GetParallelProjection())
+  if(!this->GetCamera()->GetParallelProjection())
     {
     double cameraClippingRange[2];
 
-    this->Camera->GetClippingRange(cameraClippingRange);
+    this->GetCamera()->GetClippingRange(cameraClippingRange);
 
     // We are considering the far clip plane for evaluation. In certain
     // odd conditions it might not work.
     const double maxVisibleDistanceFromCamera = this->DistanceLODThreshold * (cameraClippingRange[1]);
 
-    double dist = sqrt(vtkMath::Distance2BetweenPoints(this->Camera->GetPosition(),
+    double dist = sqrt(vtkMath::Distance2BetweenPoints(this->GetCamera()->GetPosition(),
                                                        this->Position));
 
     if(dist > maxVisibleDistanceFromCamera)
@@ -471,7 +471,7 @@ void vtkAxisFollower::ExecuteViewAngleVisibility(double normal[3])
     return;
     }
 
-  double *cameraPos = this->Camera->GetPosition();
+  double *cameraPos = this->GetCamera()->GetPosition();
   double  dir[3] = {this->Position[0] - cameraPos[0],
                     this->Position[1] - cameraPos[1],
                     this->Position[2] - cameraPos[2]};

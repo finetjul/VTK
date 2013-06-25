@@ -18,11 +18,7 @@
 #include "vtkMath.h"
 #include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
-#include "vtkProperty.h"
-#include "vtkRenderer.h"
-#include "vtkTexture.h"
 #include "vtkTransform.h"
-#include "vtkAssemblyPaths.h"
 
 #include <math.h>
 
@@ -48,7 +44,7 @@ vtkProp3DFollower::~vtkProp3DFollower()
     this->Camera->UnRegister(this);
     }
 
-  if (this->Camera)
+  if (this->Device)
     {
     this->Device->Delete();
     }

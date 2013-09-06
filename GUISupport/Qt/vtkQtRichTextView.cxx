@@ -41,18 +41,12 @@ PURPOSE.  See the above copyright notice for more information.
 #include <ui_vtkQtRichTextView.h>
 
 #include <QFrame>
-#include <QNetworkAccessManager>
-#include <QNetworkProxy>
 #include <QObject>
 #include <QPointer>
 #include <QPushButton>
+#include <QNetworkProxy>
 #include <QVBoxLayout>
-#include <QWebFrame>
 #include <QWebHistory>
-#include <QWebPage>
-#include <QWebView>
-#include <QHttpHeader>
-#include <QHttpRequestHeader>
 #include <QUrl>
 
 vtkStandardNewMacro(vtkQtRichTextView);

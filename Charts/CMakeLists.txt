@@ -96,8 +96,18 @@ SET_SOURCE_FILES_PROPERTIES(
 
 # Need to be able to include QApplication if Qt is used for runtime checks
 IF(VTK_USE_QT)
-  SET(QT_DONT_USE_QTGUI)
-  INCLUDE(${QT_USE_FILE})
+  include(vtkQt)
+  if(VTK_QT_VERSION VERSION_GREATER "4")
+    find_package(Qt5Widgets REQUIRED QUIET)
+    include_directories(${Qt5Widgets_INCLUDE_DIRS})
+    add_definitions(${Qt5Widgets_DEFINITIONS})
+    set(QT_LIBRARIES
+      ${Qt5Widgets_LIBRARIES}
+      )
+  else()
+    SET(QT_DONT_USE_QTGUI)
+    INCLUDE(${QT_USE_FILE})
+  endif()
   IF (APPLE)
     LIST (APPEND KIT_INTERFACE_LIBRARIES ${QT_LIBRARIES})
   ELSE (APPLE)

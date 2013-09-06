@@ -25,7 +25,7 @@
 #ifndef QVTKGraphicsItem_hpp
 #define QVTKGraphicsItem_hpp
 
-#include <QtGui/QGraphicsWidget>
+#include <QGraphicsWidget>
 #include <QtOpenGL/QGLContext>
 #include <vtkSmartPointer.h>
 #include "QVTKWin32Header.h"

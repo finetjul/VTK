@@ -434,8 +434,26 @@ CONFIGURE_FILE(${VTK_SOURCE_DIR}/Rendering/vtkTDxConfigure.h.in
                ${VTK_BINARY_DIR}/Rendering/vtkTDxConfigure.h @ONLY IMMEDIATE)
 
 IF(VTK_USE_QT)
-  SET(QT_DONT_USE_QTGUI)
-  INCLUDE(${QT_USE_FILE})
+  include(vtkQt)
+  if(VTK_QT_VERSION VERSION_GREATER "4")
+    find_package(Qt5Widgets REQUIRED QUIET)
+    include_directories(${Qt5Widgets_INCLUDE_DIRS})
+    add_definitions(${Qt5Widgets_DEFINITIONS})
+
+    find_package(Qt5OpenGL REQUIRED QUIET)
+    include_directories(${Qt5OpenGL_INCLUDE_DIRS})
+    add_definitions(${Qt5OpenGL_DEFINITIONS})
+
+    set(QT_LIBRARIES
+      ${Qt5Widgets_LIBRARIES}
+      ${Qt5OpenGL_LIBRARIES}
+      )
+  else()
+    SET(QT_DONT_USE_QTGUI)
+    FIND_PACKAGE(Qt4 REQUIRED QUIET)
+    MARK_AS_ADVANCED(QT_QMAKE_EXECUTABLE)
+    INCLUDE(${QT_USE_FILE})
+  endif()
 
   SET( Kit_SRCS ${Kit_SRCS}
     vtkQImageToImageSource.cxx

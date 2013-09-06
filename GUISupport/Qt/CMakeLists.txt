@@ -1,3 +1,4 @@
+include(vtkQt)
 
 # set up sources to build
 SET(QVTKLibSrcs
@@ -50,6 +51,8 @@ SET(QVTKNonMocHeaders
     vtkEventQtSlotConnect.h
     QVTKInteractor.h
     )
+SET(QVTKUISrcs
+  )
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -96,8 +99,8 @@ IF(VTK_USE_VIEWS)
     OPTION(VTK_QT_USE_WEBKIT "Option to use QT Webkit" ON)
     MARK_AS_ADVANCED(VTK_QT_USE_WEBKIT)
     IF( VTK_QT_USE_WEBKIT )
-      QT4_WRAP_UI(UI_FILES vtkQtRichTextView.ui)
-      SET(QVTKLibSrcs ${QVTKLibSrcs} ${UI_FILES} vtkQtRichTextView.cxx)
+      SET(QVTKUISrcs vtkQtRichTextView.ui)
+      SET(QVTKLibSrcs ${QVTKLibSrcs} vtkQtRichTextView.cxx)
       SET(QVTKMocHeaders ${QVTKMocHeaders} vtkQtRichTextView.h)
       IF(QT_PHONON_FOUND AND APPLE)
         SET(QT_USE_PHONON 1)
@@ -133,11 +136,44 @@ if(VTK_USE_QTCHARTS)
   endif()
 endif()
 
-# import Qt4 build settings
-SET(QT_USE_QTNETWORK 1)
-INCLUDE(${QT_USE_FILE})
+if(VTK_QT_VERSION VERSION_GREATER "4")
+  find_package(Qt5Widgets REQUIRED QUIET)
+  include_directories(${Qt5Widgets_INCLUDE_DIRS})
+  add_definitions(${Qt5Widgets_DEFINITIONS})
 
-QT4_WRAP_CPP(QVTKLibMocSrcs ${QVTKMocHeaders})
+  find_package(Qt5OpenGL REQUIRED QUIET)
+  include_directories(${Qt5OpenGL_INCLUDE_DIRS})
+  add_definitions(${Qt5OpenGL_DEFINITIONS})
+
+  find_package(Qt5Network REQUIRED QUIET)
+  include_directories(${Qt5Network_INCLUDE_DIRS})
+  add_definitions(${Qt5Network_DEFINITIONS})
+
+  find_package(Qt5WebKit REQUIRED QUIET)
+  include_directories(${Qt5WebKit_INCLUDE_DIRS})
+  add_definitions(${Qt5WebKit_DEFINITIONS})
+
+  set(QT_LIBRARIES
+    ${Qt5Widgets_LIBRARIES}
+    ${Qt5OpenGL_LIBRARIES}
+    ${Qt5Network_LIBRARIES}
+    ${Qt5WebKit_LIBRARIES}
+    )
+
+  qt5_wrap_ui(UI_FILES ${QVTKUISrcs})
+  qt5_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
+
+else()
+  # import Qt4 build settings
+  SET(QT_USE_QTNETWORK 1)
+  FIND_PACKAGE(Qt4 REQUIRED QUIET)
+  MARK_AS_ADVANCED(QT_QMAKE_EXECUTABLE)
+  INCLUDE(${QT_USE_FILE})
+
+  QT4_WRAP_UI(UI_FILES ${QVTKUISrcs})
+  QT4_WRAP_CPP(QVTKLibMocSrcs ${QVTKMocHeaders})
+endif()
+list(APPEND QVTKLibSrcs ${UI_FILES})
 
 VTK_ADD_LIBRARY(QVTK ${QVTKLibSrcs} ${QVTKLibMocSrcs})
 # Add target specific compile flags for ABI setttings
@@ -371,7 +407,11 @@ IF(BUILD_SHARED_LIBS)
 
   ADD_DEFINITIONS(-DQT_PLUGIN)
   INCLUDE_DIRECTORIES(${QT_QTDESIGNER_INCLUDE_DIR})
-  QT4_WRAP_CPP ( PluginMocSrcs ${PluginMocHeaders} )
+  IF(VTK_QT_VERSION VERSION_GREATER "4")
+    QT5_WRAP_CPP ( PluginMocSrcs ${PluginMocHeaders} )
+  ELSE(VTK_QT_VERSION VERSION_GREATER "4")
+    QT4_WRAP_CPP ( PluginMocSrcs ${PluginMocHeaders} )
+  ENDIF(VTK_QT_VERSION VERSION_GREATER "4")
 
   # add QVTK plugin from sources
   # stand-alone as it doesn't depend on QVTK library
@@ -385,8 +425,7 @@ IF(BUILD_SHARED_LIBS)
 
   # link with Qt libs
   TARGET_LINK_LIBRARIES( QVTKWidgetPlugin
-    ${QT_QTGUI_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
+    ${QT_LIBRARIES}
   )
 
   # install rules

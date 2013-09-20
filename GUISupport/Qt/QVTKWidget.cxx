@@ -73,7 +73,7 @@
 #endif
 
 /*! constructor */
-QVTKWidget::QVTKWidget(QWidget* p, Qt::WFlags f)
+QVTKWidget::QVTKWidget(QWidget* p, Qt::WindowFlags f)
   : QWidget(p, f | Qt::MSWindowsOwnDC), mRenWin(NULL),
     cachedImageCleanFlag(false),
     automaticImageCache(false), maxImageCacheRenderRate(1.0),
@@ -403,7 +403,7 @@ bool QVTKWidget::event(QEvent* e)
   
   if(QObject::event(e))
     {
-    return TRUE;
+    return true;
     }
 
   if(e->type() == QEvent::KeyPress)

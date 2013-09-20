@@ -37,7 +37,7 @@
 #define Q_VTK_WIDGET_H
 
 #include "QVTKInteractor.h"
-#include <QtGui/QWidget>
+#include <QWidget>
 
 class QVTKInteractorAdapter;
 
@@ -84,7 +84,7 @@ class QVTK_EXPORT QVTKWidget : public QWidget
 
 public:
   //! constructor
-  QVTKWidget(QWidget* parent = NULL, Qt::WFlags f = 0);
+  QVTKWidget(QWidget* parent = NULL, Qt::WindowFlags f = 0);
   //! destructor
   virtual ~QVTKWidget();
 

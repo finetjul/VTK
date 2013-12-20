@@ -63,6 +63,7 @@
 #include <mach/host_info.h>
 #include <mach/mach.h>
 #include <mach/mach_types.h>
+#include <unistd.h>
 #endif
 
 #ifdef __linux

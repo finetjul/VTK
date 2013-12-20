@@ -85,8 +85,8 @@ void vtkGenericVertexAttributeMapping::AddMapping(
 
   if (this->RemoveMapping(attributeName.str().c_str()))
     {
-    vtkWarningMacro("Replacing existsing mapping for attribute " 
-      << attributeName);
+    vtkWarningMacro("Replacing existing mapping for attribute "
+      << attributeName.str().c_str());
     }
 
   vtkInternal::vtkInfo info;

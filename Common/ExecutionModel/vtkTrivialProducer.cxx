@@ -21,6 +21,7 @@
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkDataObject.h"
+#include "vtkEventForwarderCommand.h"
 
 vtkStandardNewMacro(vtkTrivialProducer);
 
@@ -41,18 +42,26 @@ vtkTrivialProducer::vtkTrivialProducer()
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
   this->Output = 0;
+  this->ForwardCommand = 0;
 }
 
 //----------------------------------------------------------------------------
 vtkTrivialProducer::~vtkTrivialProducer()
 {
   this->SetOutput(0);
+  if (this->ForwardCommand)
+    {
+    this->ForwardCommand->SetTarget(0);
+    this->ForwardCommand->Delete();
+    }
 }
 
 //----------------------------------------------------------------------------
 void vtkTrivialProducer::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
+  os << indent << "Forward Modified Event: "
+     << this->ForwardModifiedEvent << std::endl;
 }
 
 //----------------------------------------------------------------------------
@@ -65,8 +74,18 @@ void vtkTrivialProducer::SetOutput(vtkDataObject*newOutput)
       {
       newOutput->Register(this);
       }
+    if (oldOutput && this->GetForwardModifiedEvent())
+      {
+      oldOutput->RemoveObservers(vtkCommand::ModifiedEvent,
+                                 this->ForwardCommand);
+      }
     this->Output = newOutput;
     this->GetExecutive()->SetOutputData(0, newOutput);
+    if (newOutput && this->GetForwardModifiedEvent())
+      {
+      this->ForwardCommand->SetTarget(this);
+      newOutput->AddObserver(vtkCommand::ModifiedEvent, this->ForwardCommand);
+      }
     if(oldOutput)
       {
       oldOutput->UnRegister(this);
@@ -88,6 +107,35 @@ unsigned long vtkTrivialProducer::GetMTime()
       }
     }
   return mtime;
+}
+
+//----------------------------------------------------------------------------
+void vtkTrivialProducer::SetForwardModifiedEvent(int forward)
+{
+  if (forward == this->ForwardModifiedEvent)
+    {
+    return;
+    }
+  this->ForwardModifiedEvent = forward;
+
+  if (forward)
+    {
+    if (!this->ForwardCommand)
+      {
+      this->ForwardCommand = vtkEventForwarderCommand::New();
+      }
+    if (this->Output)
+      {
+      this->Output->AddObserver(vtkCommand::ModifiedEvent,
+                                this->ForwardCommand);
+      }
+    }
+  else if (this->Output)
+    {
+    this->Output->RemoveObservers(vtkCommand::ModifiedEvent,
+                                  this->ForwardCommand);
+    }
+  this->Modified();
 }
 
 //----------------------------------------------------------------------------

@@ -27,6 +27,7 @@
 #include "vtkAlgorithm.h"
 
 class vtkDataObject;
+class vtkEventForwarderCommand;
 
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkTrivialProducer : public vtkAlgorithm
 {
@@ -52,6 +53,15 @@ public:
   // The modified time of this producer is the newer of this object or
   // the assigned output.
   virtual unsigned long GetMTime();
+
+  // Description:
+  // Propagate the ModifiedEvent triggered by the output data object
+  // to the trivial producer. This notify the pipeline that it needs
+  // to update. False(0) by default.
+  virtual void SetForwardModifiedEvent(int forward);
+  vtkGetMacro(ForwardModifiedEvent, int);
+  vtkBooleanMacro(ForwardModifiedEvent, int);
+
 protected:
   vtkTrivialProducer();
   ~vtkTrivialProducer();
@@ -62,6 +72,10 @@ protected:
 
   // The real data object.
   vtkDataObject* Output;
+
+  // Flag to control the forwardModifiedEvent behavior.
+  int ForwardModifiedEvent;
+  vtkEventForwarderCommand* ForwardCommand;
 
   virtual void ReportReferences(vtkGarbageCollector*);
 private:

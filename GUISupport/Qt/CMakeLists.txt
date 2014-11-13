@@ -62,6 +62,7 @@ if(VTK_QT_VERSION VERSION_GREATER "4")
   qt5_wrap_cpp(QVTKLibMocSrcs ${QVTKMocHeaders})
 
   set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+
 else()
   # import Qt4 build settings
   set(QT_USE_QTNETWORK 1)

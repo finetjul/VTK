@@ -140,6 +140,11 @@ protected:
   // overload focus handling so tab key is passed to VTK
   virtual bool focusNextPrevChild(bool);
 
+  // overload focus in event
+  virtual void focusInEvent(QFocusEvent*);
+  // overload focus out eventfocusInEvent
+  virtual void focusOutEvent(QFocusEvent*);
+
   // the vtk render window
   vtkSmartPointer<vtkGenericOpenGLRenderWindow> mRenWin;
   bool UseTDx;

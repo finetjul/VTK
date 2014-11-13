@@ -43,12 +43,12 @@
 #include "qpainter.h"
 #include "qsignalmapper.h"
 #include "qtimer.h"
-#include "vtkRenderingOpenGLModule.h"
+#include "vtkRenderingOpenGLConfigure.h"
 #if defined(Q_WS_X11)
 #include "qx11info_x11.h"
 #endif
 
-#if defined(Q_WS_WIN)
+#if defined(Q_OS_WIN)
 # include <windows.h>
 # include <QSysInfo>
 #endif

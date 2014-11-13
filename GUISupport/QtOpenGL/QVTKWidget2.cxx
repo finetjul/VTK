@@ -39,6 +39,7 @@ QVTKWidget2::QVTKWidget2(QWidget* p, const QGLWidget* shareWidget, Qt::WindowFla
   : QGLWidget(p, shareWidget, f), mRenWin(NULL)
 {
   this->UseTDx=false;
+  this->setFocusPolicy(Qt::StrongFocus);
   mIrenAdapter = new QVTKInteractorAdapter(this);
   mConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
   this->setMouseTracking(true);
@@ -49,6 +50,7 @@ QVTKWidget2::QVTKWidget2(QGLContext* ctx, QWidget* p, const QGLWidget* shareWidg
   : QGLWidget(ctx, p, shareWidget, f), mRenWin(NULL)
 {
   this->UseTDx=false;
+  this->setFocusPolicy(Qt::StrongFocus);
   mIrenAdapter = new QVTKInteractorAdapter(this);
   mConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
   this->setMouseTracking(true);
@@ -59,6 +61,7 @@ QVTKWidget2::QVTKWidget2(const QGLFormat& fmt, QWidget* p, const QGLWidget* shar
   : QGLWidget(fmt, p, shareWidget, f), mRenWin(NULL)
 {
   this->UseTDx=false;
+  this->setFocusPolicy(Qt::StrongFocus);
   mIrenAdapter = new QVTKInteractorAdapter(this);
   mConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
   this->setMouseTracking(true);
@@ -393,6 +396,22 @@ void QVTKWidget2::dropEvent(QDropEvent* e)
 bool QVTKWidget2::focusNextPrevChild(bool)
 {
   return false;
+}
+
+void QVTKWidget2::focusInEvent(QFocusEvent* e)
+{
+  if(this->mRenWin)
+    {
+    mIrenAdapter->ProcessEvent(e, this->mRenWin->GetInteractor());
+    }
+}
+
+void QVTKWidget2::focusOutEvent(QFocusEvent* e)
+{
+  if(this->mRenWin)
+    {
+    mIrenAdapter->ProcessEvent(e, this->mRenWin->GetInteractor());
+    }
 }
 
 #ifdef VTK_USE_TDX

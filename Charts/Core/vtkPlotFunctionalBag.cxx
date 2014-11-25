@@ -53,9 +53,25 @@ vtkPlotFunctionalBag::~vtkPlotFunctionalBag()
 }
 
 //-----------------------------------------------------------------------------
+void vtkPlotFunctionalBag::SetSelection(vtkIdTypeArray *id)
+{
+  this->Superclass::SetSelection(id);
+  if (this->BagPoints->GetNumberOfPoints() == 0)
+    {
+    this->Line->SetSelection(id);
+    }
+}
+
+//-----------------------------------------------------------------------------
+bool vtkPlotFunctionalBag::GetVisible()
+{
+  return this->Superclass::GetVisible() || this->GetSelection() != 0;
+}
+
+//-----------------------------------------------------------------------------
 void vtkPlotFunctionalBag::Update()
 {
-  if (!this->Visible)
+  if (!this->GetVisible())
     {
     return;
     }
@@ -204,9 +220,18 @@ bool vtkPlotFunctionalBag::Paint(vtkContext2D *painter)
   // This is where everything should be drawn, or dispatched to other methods.
   vtkDebugMacro(<< "Paint event called in vtkPlotFunctionalBag.");
 
-  if (!this->Visible)
+  if (!this->GetVisible())
     {
     return false;
+    }
+
+  unsigned char color[3];
+  this->GetColor(color);
+  if (this->GetSelection())
+    {
+    this->Line->SetWidth(2.);
+    this->Line->SetColor(255, 10, 20);
+    this->Pen->SetColor(255, 10, 20);
     }
 
   if (this->BagPoints->GetNumberOfPoints() > 0)
@@ -226,6 +251,12 @@ bool vtkPlotFunctionalBag::Paint(vtkContext2D *painter)
     this->Line->Paint(painter);
     }
 
+ if (this->GetSelection())
+    {
+    this->Line->SetWidth(this->GetWidth());
+    this->Line->SetColor(color[0], color[1], color[2]);
+    this->Pen->SetColor(color[0], color[1], color[2]);
+    }
   return true;
 }
 
@@ -259,6 +290,26 @@ vtkIdType vtkPlotFunctionalBag::GetNearestPoint(const vtkVector2f& point,
     return this->Line->GetNearestPoint(point, tol, loc);
     }
   return -1;
+}
+
+//-----------------------------------------------------------------------------
+bool vtkPlotFunctionalBag::SelectPoints(const vtkVector2f& min, const vtkVector2f& max)
+{
+  if (this->BagPoints->GetNumberOfPoints() == 0)
+    {
+    return this->Line->SelectPoints(min, max);
+    }
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+bool vtkPlotFunctionalBag::SelectPointsInPolygon(const vtkContextPolygon &polygon)
+{
+  if (this->BagPoints->GetNumberOfPoints() == 0)
+    {
+    return this->Line->SelectPointsInPolygon(polygon);
+    }
+  return false;
 }
 
 //-----------------------------------------------------------------------------

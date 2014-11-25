@@ -50,6 +50,14 @@ public:
   static vtkPlotFunctionalBag *New();
 
   // Description:
+  // Reimplemented to enforce visibility when selected.
+  virtual bool GetVisible();
+
+  // Description:
+  // Reimplemented to propagate to line
+  virtual void SetSelection(vtkIdTypeArray *id);
+
+  // Description:
   // Perform any updates to the item that may be necessary before rendering.
   // The scene should take care of calling this on all items before their
   // Paint function is invoked.
@@ -95,7 +103,13 @@ public:
                                     const vtkVector2f& tolerance,
                                     vtkVector2f* location);
 //ETX
+  // Description:
+  // Select all points in the specified rectangle.
+  virtual bool SelectPoints(const vtkVector2f& min, const vtkVector2f& max);
 
+  // Description:
+  // Select all points in the specified polygon.
+  virtual bool SelectPointsInPolygon(const vtkContextPolygon &polygon);
 protected:
   vtkPlotFunctionalBag();
   ~vtkPlotFunctionalBag();

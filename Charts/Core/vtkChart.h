@@ -138,7 +138,8 @@ public:
   // selection remains specific to the plot object.
   enum {
     SELECTION_ROWS,
-    SELECTION_PLOTS
+    SELECTION_PLOTS,
+    SELECTION_COLUMNS
   };
 
   // Description:

@@ -128,10 +128,6 @@ bool vtkPlotFunctionalBag::UpdateTableCache(vtkTable *table)
       array[0] ? array[0]->GetName() : "", array[1]->GetName());
     this->Line->SetUseIndexForXSeries(this->UseIndexForXSeries);
     this->Line->SetMarkerStyle(vtkPlotPoints::NONE);
-    double rgb[3];
-    this->GetColor(rgb);
-    this->Line->SetColor(rgb[0], rgb[1], rgb[2]);
-    this->Line->SetWidth(this->GetWidth());
     this->Line->SetPen(this->Pen);
     this->Line->SetBrush(this->Brush);
     this->Line->Update();
@@ -225,38 +221,26 @@ bool vtkPlotFunctionalBag::Paint(vtkContext2D *painter)
     return false;
     }
 
-  unsigned char color[3];
-  this->GetColor(color);
-  if (this->GetSelection())
-    {
-    this->Line->SetWidth(2.);
-    this->Line->SetColor(255, 10, 20);
-    this->Pen->SetColor(255, 10, 20);
-    }
+  vtkPen* pen = this->GetSelection() ? this->SelectionPen : this->Pen;
 
   if (this->BagPoints->GetNumberOfPoints() > 0)
     {
+    double pwidth = pen->GetWidth();
+    pen->SetWidth(0.);
+    painter->ApplyPen(pen);
     unsigned char pcolor[4];
-    double pwidth = this->Pen->GetWidth();
-    this->Pen->SetWidth(0.);
-    painter->ApplyPen(this->Pen);
-    this->Pen->GetColor(pcolor);
+    pen->GetColor(pcolor);
     this->Brush->SetColor(pcolor);
     painter->ApplyBrush(this->Brush);
     painter->DrawQuadStrip(this->BagPoints.GetPointer());
-    this->Pen->SetWidth(pwidth);
+    pen->SetWidth(pwidth);
     }
   else
     {
+    this->Line->SetPen(pen);
     this->Line->Paint(painter);
     }
 
- if (this->GetSelection())
-    {
-    this->Line->SetWidth(this->GetWidth());
-    this->Line->SetColor(color[0], color[1], color[2]);
-    this->Pen->SetColor(color[0], color[1], color[2]);
-    }
   return true;
 }
 

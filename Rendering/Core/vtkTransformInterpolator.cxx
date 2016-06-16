@@ -177,34 +177,32 @@ void vtkTransformInterpolator::AddTransform(double t, vtkTransform *xform)
   if ( size <= 0 || t < this->TransformList->front().Time )
     {
     this->TransformList->push_front(vtkQTransform(t,xform));
-    return;
     }
   else if ( t > this->TransformList->back().Time )
     {
     this->TransformList->push_back(vtkQTransform(t,xform));
-    return;
     }
   else if ( size == 1 && t == this->TransformList->back().Time )
     {
     this->TransformList->front() = vtkQTransform(t,xform);
-    return;
     }
-
-  // Okay, insert in sorted order
-  TransformListIterator iter = this->TransformList->begin();
-  TransformListIterator nextIter = ++(this->TransformList->begin());
-  for (int i=0; i < (size-1); i++, ++iter, ++nextIter)
+  else
     {
-    if ( t == iter->Time )
+    // Okay, insert in sorted order
+    TransformListIterator iter = this->TransformList->begin();
+    TransformListIterator nextIter = ++(this->TransformList->begin());
+    for (int i=0; i < (size-1); i++, ++iter, ++nextIter)
       {
-      (*iter) = vtkQTransform(t,xform);
-      }
-    else if ( t > iter->Time && t < nextIter->Time )
-      {
-      this->TransformList->insert(nextIter, vtkQTransform(t,xform));
+      if ( t == iter->Time )
+        {
+        (*iter) = vtkQTransform(t,xform);
+        }
+      else if ( t > iter->Time && t < nextIter->Time )
+        {
+        this->TransformList->insert(nextIter, vtkQTransform(t,xform));
+        }
       }
     }
-
   this->Modified();
 }
 

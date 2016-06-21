@@ -476,8 +476,17 @@ template<typename T> vtkQuaternion<T> vtkQuaternion<T>
   T axis0[3], axis1[3];
   this->GetRotationAngleAndAxis(axis0);
   q1.GetRotationAngleAndAxis(axis1);
-  const T dot = vtkMath::Dot(axis0, axis1);
+  T dot = vtkMath::Dot(axis0, axis1);
   double t1, t2;
+
+  // Use shortest path
+
+  bool useConjugate = false;
+  if (dot < 0.)
+    {
+    dot = -dot;
+    useConjugate = true;
+    }
 
   // To avoid division by zero, perform a linear interpolation (LERP), if our
   // quarternions are nearly in the same direction, otherwise resort
@@ -495,6 +504,13 @@ template<typename T> vtkQuaternion<T> vtkQuaternion<T>
     t1 = sin((1.0-t)*theta)/sin(theta);
     t2 = sin(t*theta)/sin(theta);
     }
+
+  // Enforces shortest path
+
+  if (useConjugate)
+  {
+    t2 *= -1.;
+  }
 
   return (*this)*t1 + q1*t2;
 }

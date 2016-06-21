@@ -496,6 +496,13 @@ template<typename T> vtkQuaternion<T> vtkQuaternion<T>
     t2 = sin(t*theta)/sin(theta);
     }
 
+  // Enforces shortest path
+
+  if (dot < 0.)
+    {
+    t2 *= -1.;
+    }
+
   return (*this)*t1 + q1*t2;
 }
 

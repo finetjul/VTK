@@ -39,6 +39,16 @@ template<typename T> vtkQuaternion<T>
 }
 
 //----------------------------------------------------------------------------
+template<typename T> vtkQuaternion<T>
+::vtkQuaternion(const T& w, const T* xyz)
+{
+  this->Data[0] = w;
+  this->Data[1] = xyz[0];
+  this->Data[2] = xyz[1];
+  this->Data[3] = xyz[2];
+}
+
+//----------------------------------------------------------------------------
 template<typename T> T vtkQuaternion<T>::SquaredNorm() const
 {
   T result = 0.0;
@@ -300,6 +310,13 @@ vtkQuaternion<T> vtkQuaternion<T>::operator-(const vtkQuaternion<T>& q) const
 
 //----------------------------------------------------------------------------
 template<typename T>
+vtkQuaternion<T> vtkQuaternion<T>::operator-() const
+{
+  return this->Conjugated();
+}
+
+//----------------------------------------------------------------------------
+template<typename T>
 vtkQuaternion<T> vtkQuaternion<T>::operator*(const vtkQuaternion<T>& q) const
 {
   vtkQuaternion<T> ret;
@@ -470,6 +487,25 @@ template<typename T> void vtkQuaternion<T>::FromMatrix3x3(const T A[3][3])
   }
 }
 
+template<typename T> void vtkQuaternion<T>::FromMatrix4x4(const vtkMatrix4x4* rotationMatrix)
+{
+  T A[3][3];
+
+  // on-diagonal elements
+  A[0][0] =  rotationMatrix->GetElement(0,0);
+  A[0][1] =  rotationMatrix->GetElement(0,1);
+  A[0][2] =  rotationMatrix->GetElement(0,2);
+
+  A[1][0] =  rotationMatrix->GetElement(1,0);
+  A[1][1] =  rotationMatrix->GetElement(1,1);
+  A[1][2] =  rotationMatrix->GetElement(1,2);
+
+  A[2][0] =  rotationMatrix->GetElement(2,0);
+  A[2][1] =  rotationMatrix->GetElement(2,1);
+  A[2][2] =  rotationMatrix->GetElement(2,2);
+  FromMatrix3x3(A);
+}
+
 //----------------------------------------------------------------------------
 // This returns the constant angular velocity interpolation of two quaternions
 // on the unit quaternion sphere :
@@ -533,6 +569,13 @@ template<typename T> vtkQuaternion<T> vtkQuaternion<T>
 
   vtkQuaternion<T> qExp = qSum.UnitExp();
   return q1*qExp;
+}
+
+//----------------------------------------------------------------------------
+template<typename T> T vtkQuaternion<T>::Dot(const vtkQuaternion<T>& q)const
+{
+  return this->GetW()*q.GetW() + this->GetX()*q.GetX()
+       + this->GetY()*q.GetY() + this->GetZ()*q.GetZ();
 }
 
 //----------------------------------------------------------------------------

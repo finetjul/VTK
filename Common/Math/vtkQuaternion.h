@@ -31,6 +31,7 @@
 #define vtkQuaternion_h
 
 #include "vtkTuple.h"
+class vtkMatrix4x4;
 
 template<typename T> class vtkQuaternion : public vtkTuple<T, 4>
 {
@@ -52,6 +53,10 @@ public:
   // Description:
   // Initialize the quaternion element explicitly.
   vtkQuaternion(const T& w, const T& x, const T& y, const T& z);
+
+  // Description:
+  // Initialize the quaternion element explicitly.
+  vtkQuaternion(const T& w, const T* xyz);
 
   // Description:
   // Get the squared norm of the quaternion.
@@ -179,8 +184,13 @@ public:
   // Convert a 3x3 matrix into a quaternion.  This will provide the
   // best possible answer even if the matrix is not a pure rotation matrix.
   // The method used is that of B.K.P. Horn.
-  // @sa ToMatrix3x3()
+  // @sa ToMatrix3x3(), FromMatrix4x4()
   void FromMatrix3x3(const T A[3][3]);
+
+  // Description:
+  // Convert a 4x4 matrix into a quaternion. Translation is ignored.
+  // @sa FromMatrix3x3(), ToMatrix3x3()
+  void FromMatrix4x4(const vtkMatrix4x4* rotationMatrix);
 
   // Description:
   // Interpolate quaternions using spherical linear interpolation between
@@ -197,12 +207,20 @@ public:
     const vtkQuaternion<T>& q2) const;
 
   // Description:
+  // Computes the dot product between quaternions.
+  T Dot(const vtkQuaternion<T>& q) const;
+
+  // Description:
   // Performs addition of quaternion of the same basic type.
   vtkQuaternion<T> operator+(const vtkQuaternion<T>& q) const;
 
   // Description:
   // Performs subtraction of quaternions of the same basic type.
   vtkQuaternion<T> operator-(const vtkQuaternion<T>& q) const;
+
+  // Description:
+  // Computes the conjugate
+  vtkQuaternion<T> operator-() const;
 
   // Description:
   // Performs multiplication of quaternion of the same basic type.

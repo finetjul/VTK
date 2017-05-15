@@ -35,7 +35,7 @@
 
 #include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkRenderWindowInteractor.h"
-#include "vtkTDxConfigure.h" // defines VTK_USE_TDX
+
 #ifdef VTK_USE_TDX
 class vtkTDxMacDevice;
 #endif

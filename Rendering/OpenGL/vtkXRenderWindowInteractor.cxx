@@ -34,7 +34,6 @@
 
 #include <map>
 
-#include "vtkTDxConfigure.h" // defines VTK_USE_TDX
 #ifdef VTK_USE_TDX
 #include "vtkTDxUnixDevice.h"
 #endif

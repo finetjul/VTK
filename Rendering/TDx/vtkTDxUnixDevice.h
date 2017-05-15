@@ -25,7 +25,7 @@
 #ifndef vtkTDxUnixDevice_h
 #define vtkTDxUnixDevice_h
 
-#include "vtkRenderingOpenGLModule.h" // For export macro
+#include "vtkRenderingTDxModule.h" // For export macro
 #include "vtkTDxDevice.h"
 //#include <X11/Xlib.h> // Needed for X types used in the public interface
 class vtkRenderWindowInteractor;
@@ -38,7 +38,7 @@ typedef void vtkTDxUnixDeviceDisplay;
 typedef unsigned int vtkTDxUnixDeviceWindow;
 typedef void vtkTDxUnixDeviceXEvent;
 
-class VTKRENDERINGOPENGL_EXPORT vtkTDxUnixDevice : public vtkTDxDevice
+class VTKRENDERINGTDX_EXPORT vtkTDxUnixDevice : public vtkTDxDevice
 {
 public:
   static vtkTDxUnixDevice *New();

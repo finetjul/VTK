@@ -25,7 +25,7 @@
 #ifndef vtkTDxWinDevice_h
 #define vtkTDxWinDevice_h
 
-#include "vtkRenderingOpenGLModule.h" // For export macro
+#include "vtkRenderingTDxModule.h" // For export macro
 #include "vtkTDxDevice.h"
 
 class vtkRenderWindowInteractor;
@@ -38,7 +38,7 @@ class vtkRenderWindowInteractor;
 
 class vtkTDxWinDevicePrivate;
 
-class VTKRENDERINGOPENGL_EXPORT vtkTDxWinDevice : public vtkTDxDevice
+class VTKRENDERINGTDX_EXPORT vtkTDxWinDevice : public vtkTDxDevice
 {
 public:
   static vtkTDxWinDevice *New();

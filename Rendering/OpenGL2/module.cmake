@@ -1,3 +1,7 @@
+if (VTK_USE_TDX)
+  set(tdx_module "vtkRenderingTDx")
+endif(VTK_USE_TDX)
+
 vtk_module(vtkRenderingOpenGL2
   TCL_NAME
     vtkRenderingOpenGLII
@@ -24,6 +28,7 @@ vtk_module(vtkRenderingOpenGL2
     vtkCommonCore
     vtkCommonDataModel
     vtkRenderingCore
+    ${tdx_module}
   PRIVATE_DEPENDS
     vtkCommonExecutionModel
     vtkCommonMath

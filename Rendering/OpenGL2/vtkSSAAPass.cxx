@@ -170,6 +170,9 @@ void vtkSSAAPass::Render(const vtkRenderState *s)
   GLint savedDrawBuffer;
   glGetIntegerv(GL_DRAW_BUFFER,&savedDrawBuffer);
 #endif
+  // backup GL state
+  GLboolean savedBlend = glIsEnabled(GL_BLEND);
+  GLboolean savedDepthTest = glIsEnabled(GL_DEPTH_TEST);
 
   // 1. Create a new render state with an FBO.
   int width;
@@ -328,6 +331,16 @@ void vtkSSAAPass::Render(const vtkRenderState *s)
                                 this->SSAAProgram->VAO);
 
   this->Pass2->Deactivate();
+
+  // restore GL state
+  if (savedBlend)
+  {
+    glEnable(GL_BLEND);
+  }
+  if (savedDepthTest)
+  {
+    glEnable(GL_DEPTH_TEST);
+  }
 
   vtkOpenGLCheckErrorMacro("failed after Render");
 }

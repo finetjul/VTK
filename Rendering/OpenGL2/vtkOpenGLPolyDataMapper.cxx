@@ -1189,10 +1189,13 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderClip(
       "uniform vec4 clipPlanes[6];\n"
       "varying float clipDistancesVSOutput[6];");
     vtkShaderProgram::Substitute(VSSource, "//VTK::Clip::Impl",
-      "for (int planeNum = 0; planeNum < numClipPlanes; planeNum++)\n"
-      "    {\n"
-      "    clipDistancesVSOutput[planeNum] = dot(clipPlanes[planeNum], vertexMC);\n"
-      "    }\n");
+      "clipDistancesVSOutput[0] = dot(clipPlanes[0], vertexMC);\n"
+      "clipDistancesVSOutput[1] = dot(clipPlanes[1], vertexMC);\n"
+      "clipDistancesVSOutput[2] = dot(clipPlanes[2], vertexMC);\n"
+      "clipDistancesVSOutput[3] = dot(clipPlanes[3], vertexMC);\n"
+      "clipDistancesVSOutput[4] = dot(clipPlanes[4], vertexMC);\n"
+      "clipDistancesVSOutput[5] = dot(clipPlanes[5], vertexMC);\n"
+      );
     vtkShaderProgram::Substitute(FSSource, "//VTK::Clip::Dec",
       "uniform int numClipPlanes;\n"
       "varying float clipDistancesVSOutput[6];");
@@ -1973,10 +1976,13 @@ void vtkOpenGLPolyDataMapper::SetMapperShaderParameters(vtkOpenGLHelper &cellBO,
     }
 
     float planeEquations[6][4];
-    for (int i = 0; i < numClipPlanes; i++)
+    for (int i = 0; i < 6; i++)
     {
-      double planeEquation[4];
-      this->GetClippingPlaneInDataCoords(actor->GetMatrix(), i, planeEquation);
+      double planeEquation[4] = { 0., 0., 0., 0. };
+      if (i < numClipPlanes)
+      {
+        this->GetClippingPlaneInDataCoords(actor->GetMatrix(), i, planeEquation);
+      }
       planeEquations[i][0] = planeEquation[0];
       planeEquations[i][1] = planeEquation[1];
       planeEquations[i][2] = planeEquation[2];

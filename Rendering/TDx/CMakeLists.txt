@@ -14,6 +14,16 @@ set(Module_SRCS
   )
 
 if(WIN32)
+  # In vtkTDxWinDevice.cxx, #import "progid:TDxInput.Device.1" no_namespace
+  # This sourcefile is incompatible with '/MP' flag.
+  get_source_file_property(compile_props "${CMAKE_CURRENT_SOURCE_DIR}/vtkTDxWinDevice.cxx" COMPILE_FLAGS)
+  if(NOT compile_props)
+    set(compile_props "/MP1")
+  else()
+    string(REPLACE "/MP[0-9]*" " " compile_props ${compile_props})
+  endif()
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/vtkTDxWinDevice.cxx" COMPILE_FLAGS "${compile_props}")
+
   list(APPEND Module_SRCS vtkTDxWinDevice.cxx)
 endif()
 if(UNIX)

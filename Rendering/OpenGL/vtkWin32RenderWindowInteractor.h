@@ -34,7 +34,6 @@
 #include "vtkRenderWindowInteractor.h"
 #include "vtkWindows.h" // For windows API.
 
-#include "vtkTDxConfigure.h" // defines VTK_USE_TDX
 #ifdef VTK_USE_TDX
 class vtkTDxWinDevice;
 #endif

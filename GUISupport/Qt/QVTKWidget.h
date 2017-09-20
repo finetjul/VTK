@@ -48,7 +48,6 @@ class vtkRenderWindow;
 #include <vtkToolkits.h>
 class vtkImageData;
 
-#include "vtkTDxConfigure.h" // defines VTK_USE_TDX
 #ifdef VTK_USE_TDX
 class vtkTDxDevice;
 #endif

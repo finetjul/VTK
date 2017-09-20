@@ -1,3 +1,7 @@
+if (VTK_USE_TDX)
+  set(tdx_module "vtkRenderingTDx")
+endif(VTK_USE_TDX)
+
 vtk_module(vtkRenderingOpenGL
   IMPLEMENTS
     vtkRenderingCore
@@ -27,6 +31,7 @@ vtk_module(vtkRenderingOpenGL
     vtkCommonDataModel
     vtkFiltersCore
     vtkRenderingCore
+    ${tdx_module}
   PRIVATE_DEPENDS
     vtkCommonExecutionModel
     vtkCommonMath

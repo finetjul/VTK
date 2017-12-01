@@ -27,6 +27,7 @@
 #include "vtkLightCollection.h"
 #include "vtkLight.h"
 #include "vtkMath.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
@@ -471,10 +472,31 @@ void vtkX3DExporter::WriteAnActor(vtkActor *anActor,
   trans = vtkSmartPointer<vtkTransform>::New();
   trans->SetMatrix(anActor->vtkProp3D::GetMatrix());
 
+  // Transform must be tweaked in order to display the correct result.
+  double currentTranslation[3];
+  trans->GetPosition(currentTranslation);
+
+  vtkNew<vtkMatrix4x4> rotationMatrix;
+  vtkNew<vtkMatrix4x4> translationMatrix;
+  for (int i = 0; i < 3; ++i)
+  {
+    rotationMatrix->SetElement(i, 0, trans->GetMatrix()->GetElement(i, 0));
+    rotationMatrix->SetElement(i, 1, trans->GetMatrix()->GetElement(i, 1));
+    rotationMatrix->SetElement(i, 2, trans->GetMatrix()->GetElement(i, 2));
+    translationMatrix->SetElement(i, 3, currentTranslation[i]);
+  }
+
+  // M = R-1 * T.
+  rotationMatrix->Invert();
+
+  vtkNew<vtkTransform> result;
+  vtkMatrix4x4::Multiply4x4(translationMatrix.Get(), rotationMatrix.Get(),
+    result->GetMatrix());
+
   writer->StartNode(Transform);
-  writer->SetField(translation, SFVEC3F, trans->GetPosition());
-  writer->SetField(rotation, SFROTATION, trans->GetOrientationWXYZ());
-  writer->SetField(scale, SFVEC3F, trans->GetScale());
+  writer->SetField(translation, SFVEC3F, result->GetPosition());
+  writer->SetField(rotation, SFROTATION, result->GetOrientationWXYZ());
+  writer->SetField(scale, SFVEC3F, result->GetScale());
 
   prop = anActor->GetProperty();
   points = pd->GetPoints();

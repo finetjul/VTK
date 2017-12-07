@@ -27,6 +27,7 @@
 #include "vtkLightCollection.h"
 #include "vtkLight.h"
 #include "vtkMath.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"

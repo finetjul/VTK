@@ -16,6 +16,8 @@
 // .SECTION Description
 // Tests vtkObject::AddObserver templated API
 
+#include "vtkCallbackCommand.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkSmartPointer.h"
 #include <map>
@@ -56,8 +58,9 @@ public:
 int OtherHandler::VoidEventCounts = 0;
 std::map<int, int> OtherHandler::EventCounts;
 
-int TestObservers(int, char*[])
+bool TestAddRemoveAndEventCounts()
 {
+
   unsigned long event0 = 0;
   unsigned long event1 = 0;
   unsigned long event2 = 0;
@@ -111,7 +114,7 @@ int TestObservers(int, char*[])
   {
     cerr << "Mismatched callback counts for VTK observer." << endl;
     volcano->Delete();
-    return 1;
+    return false;
   }
 
   // ---------------------------------
@@ -168,7 +171,7 @@ int TestObservers(int, char*[])
   {
     cerr << "Mismatched callback counts for smart pointer observer." << endl;
     volcano->Delete();
-    return 1;
+    return false;
   }
 
   // ---------------------------------
@@ -211,9 +214,95 @@ int TestObservers(int, char*[])
     OtherHandler::EventCounts[1008] == 1)
   {
     cout << "All non-VTK observer callback counts as expected." << endl;
-    return 0;
+    return true;
   }
 
   cerr << "Mismatched callback counts for non-VTK observer." << endl;
-  return 1;
+  return false;
+}
+
+/**
+ * @brief Remove callback command @a clientData observation from invoker and
+ * invoke event 1002 if @a event is not 1002.
+ * @param clientData If a callbackCommand is given, its observation will be removed from the invoker.
+ */
+void removeObserverAndOrInvokeEvent(vtkObject* invoker, unsigned long event, void* clientData, void* vtkNotUsed(eventData))
+{
+  vtkCallbackCommand* callbackToRemove = reinterpret_cast<vtkCallbackCommand*>(clientData);
+  if (callbackToRemove)
+  {
+    invoker->RemoveObserver(callbackToRemove);
+  }
+
+  if (event != 1002)
+  {
+    invoker->InvokeEvent(1002);
+  }
+}
+
+/**
+ * @brief Consider clientData as a bool* and set its value to true.
+ */
+void setClientDataToTrue(vtkObject* vtkNotUsed(invoker), unsigned long vtkNotUsed(event), void* clientData, void* vtkNotUsed(eventData))
+{
+  bool* clientDataBool = reinterpret_cast<bool*>(clientData);
+  *clientDataBool = true;
+}
+
+/**
+ * @brief This test makes sure that a removed observer is not processed
+ * by the InvokeEvent loop.
+ * @details The test should not crash.
+ * @param removeObserverIn1000Or1002 true to remove observer in event 1000,
+ * false to remove observer in event 1002
+ * @sa removeObserverAndOrInvokeEvent() setClientDataToTrue()
+ */
+bool TestModifyList(bool removeObserverIn1000)
+{
+  vtkNew<vtkObject> invoker;
+
+  vtkNew<vtkCallbackCommand> removeObserverAndInvokeCallback;
+  removeObserverAndInvokeCallback->SetCallback(&removeObserverAndOrInvokeEvent);
+
+  double priority = 2.0; // make sure it is the first to be processed
+  invoker->AddObserver(1000, removeObserverAndInvokeCallback.Get(), priority);
+
+  bool observerCalled = false; // must stay false
+  vtkNew<vtkCallbackCommand> observerToBeRemoved;
+  observerToBeRemoved->SetCallback(&setClientDataToTrue);
+  observerToBeRemoved->SetClientData(&observerCalled);
+  priority = 1.0; // make sure it is the second to be processed
+  invoker->AddObserver(1000, observerToBeRemoved.Get(), priority);
+
+  vtkNew<vtkCallbackCommand> removeObserverCallback;
+  removeObserverCallback->SetCallback(&removeObserverAndOrInvokeEvent);
+  priority = 0.0; // make sure it is the third to be processed
+  invoker->AddObserver(1002, removeObserverCallback.Get(), priority);
+
+  // observerToBeRemoved must be unobserved before being executed.
+  if (removeObserverIn1000)
+  {
+    removeObserverAndInvokeCallback->SetClientData(observerToBeRemoved.Get());
+  }
+  else
+  {
+    removeObserverCallback->SetClientData(observerToBeRemoved.Get());
+  }
+
+  invoker->InvokeEvent(1000, NULL);
+
+  return !observerCalled;
+}
+
+
+/**
+ * @brief Runs all the tests of observers
+ */
+int TestObservers(int vtkNotUsed(argc), char* vtkNotUsed(argv)[])
+{
+  bool res = TestAddRemoveAndEventCounts();
+  res = res && TestModifyList(false);
+  res = res && TestModifyList(true);
+
+  return res ? EXIT_SUCCESS : EXIT_FAILURE;
 }

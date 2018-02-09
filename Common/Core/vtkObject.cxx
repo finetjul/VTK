@@ -95,7 +95,7 @@ void vtkObserver::PrintSelf(ostream& os, vtkIndent indent)
 class vtkSubjectHelper
 {
 public:
-  vtkSubjectHelper():ListModified(0),Focus1(nullptr),Focus2(nullptr),Start(nullptr),Count(1) {}
+  vtkSubjectHelper():ListModified(),Focus1(nullptr),Focus2(nullptr),Start(nullptr),Count(1) {}
   ~vtkSubjectHelper();
 
   unsigned long AddObserver(unsigned long event, vtkCommand *cmd, float p);
@@ -112,7 +112,7 @@ public:
   void ReleaseFocus() {this->Focus1 = nullptr; this->Focus2 = nullptr;}
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  int         ListModified;
+  vtkTimeStamp ListModified;
 
   // This is to support the GrabFocus() methods found in vtkInteractorObserver.
   vtkCommand *Focus1;
@@ -336,7 +336,7 @@ void vtkSubjectHelper::RemoveObserver(unsigned long tag)
     }
   }
 
-  this->ListModified = 1;
+  this->ListModified.Modified();
 }
 
 //----------------------------------------------------------------------------
@@ -372,7 +372,7 @@ void vtkSubjectHelper::RemoveObservers(unsigned long event)
     }
   }
 
-  this->ListModified = 1;
+  this->ListModified.Modified();
 }
 
 //----------------------------------------------------------------------------
@@ -408,7 +408,7 @@ void vtkSubjectHelper::RemoveObservers(unsigned long event, vtkCommand *cmd)
     }
   }
 
-  this->ListModified = 1;
+  this->ListModified.Modified();
 }
 
 //----------------------------------------------------------------------------
@@ -462,17 +462,6 @@ int vtkSubjectHelper::InvokeEvent(unsigned long event, void *callData,
 {
   int focusHandled = 0;
 
-  // When we invoke an event, the observer may add or remove observers.  To make
-  // sure that the iteration over the observers goes smoothly, we capture any
-  // change to the list with the ListModified ivar.  However, an observer may
-  // also do something that causes another event to be invoked in this object.
-  // That means that this method will be called recursively, which means that we
-  // will obliterate the ListModified flag that the first call is relying on.
-  // To get around this, save the previous ListModified value on the stack and
-  // then restore it before leaving.
-  int saveListModified = this->ListModified;
-  this->ListModified = 0;
-
   // We also need to save what observers we have called on the stack (lest it
   // get overridden in the event invocation).  Also make sure that we do not
   // invoke any new observers that were added during another observer's
@@ -480,6 +469,12 @@ int vtkSubjectHelper::InvokeEvent(unsigned long event, void *callData,
   typedef std::vector<unsigned long> VisitedListType;
   VisitedListType visited;
   vtkObserver *elem = this->Start;
+  // When we invoke an event, the observer may add or remove observers.  To make
+  // sure that the iteration over the observers goes smoothly, we capture any
+  // change to the list with the ListModified ivar.  However, an observer may
+  // also do something that causes another event to be invoked in this object.
+  // That means that this method may be called recursively.
+  vtkMTimeType startListModifiedMTime = this->ListModified.GetMTime();
   // If an element with a tag greater than maxTag is found, that means it has
   // been added after InvokeEvent is called (as a side effect of calling an
   // element command. In that case, the element is discarded and not executed.
@@ -528,11 +523,11 @@ int vtkSubjectHelper::InvokeEvent(unsigned long event, void *callData,
         command->UnRegister();
       }
     }
-    if (this->ListModified)
+    if (this->ListModified.GetMTime() != startListModifiedMTime)
     {
       vtkGenericWarningMacro(<<"Passive observer should not call AddObserver or RemoveObserver in callback.");
       elem = this->Start;
-      this->ListModified = 0;
+      startListModifiedMTime = this->ListModified.GetMTime();
     }
     else
     {
@@ -545,6 +540,7 @@ int vtkSubjectHelper::InvokeEvent(unsigned long event, void *callData,
   if (this->Focus1 || this->Focus2)
   {
     elem = this->Start;
+    startListModifiedMTime = this->ListModified.GetMTime();
     while (elem)
     {
       // store the next pointer because elem could disappear due to Command
@@ -572,16 +568,15 @@ int vtkSubjectHelper::InvokeEvent(unsigned long event, void *callData,
           if(command->GetAbortFlag())
           {
             command->UnRegister();
-            this->ListModified = saveListModified;
             return 1;
           }
           command->UnRegister();
         }
       }
-      if (this->ListModified)
+      if (this->ListModified.GetMTime() != startListModifiedMTime)
       {
         elem = this->Start;
-        this->ListModified = 0;
+        startListModifiedMTime = this->ListModified.GetMTime();
       }
       else
       {
@@ -595,6 +590,7 @@ int vtkSubjectHelper::InvokeEvent(unsigned long event, void *callData,
   if (!focusHandled)
   {
     elem = this->Start;
+    startListModifiedMTime = this->ListModified.GetMTime();
     while (elem)
     {
       // store the next pointer because elem could disappear due to Command
@@ -619,16 +615,15 @@ int vtkSubjectHelper::InvokeEvent(unsigned long event, void *callData,
           if(command->GetAbortFlag())
           {
             command->UnRegister();
-            this->ListModified = saveListModified;
             return 1;
           }
           command->UnRegister();
         }
       }
-      if (this->ListModified)
+      if (this->ListModified.GetMTime() != startListModifiedMTime)
       {
         elem = this->Start;
-        this->ListModified = 0;
+        startListModifiedMTime = this->ListModified.GetMTime();
       }
       else
       {
@@ -637,7 +632,6 @@ int vtkSubjectHelper::InvokeEvent(unsigned long event, void *callData,
     }
   }
 
-  this->ListModified = saveListModified;
   return 0;
 }
 

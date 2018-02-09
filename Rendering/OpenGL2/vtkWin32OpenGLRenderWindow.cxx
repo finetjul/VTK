@@ -1134,8 +1134,8 @@ int *vtkWin32OpenGLRenderWindow::GetSize(void)
     //  Find the current window size
     if (GetClientRect(this->WindowId, &rect))
     {
-      this->Size[0] = rect.right;
-      this->Size[1] = rect.bottom;
+      //this->Size[0] = rect.right;
+      //this->Size[1] = rect.bottom;
     }
     else
     {

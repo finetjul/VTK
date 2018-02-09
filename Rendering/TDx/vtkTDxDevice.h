@@ -29,12 +29,12 @@
 #ifndef vtkTDxDevice_h
 #define vtkTDxDevice_h
 
-#include "vtkRenderingOpenGLModule.h" // For export macro
+#include "vtkRenderingTDxModule.h" // For export macro
 #include "vtkObject.h"
 
 class vtkRenderWindowInteractor;
 
-class VTKRENDERINGOPENGL_EXPORT vtkTDxDevice : public vtkObject
+class VTKRENDERINGTDX_EXPORT vtkTDxDevice : public vtkObject
 {
 public:
   vtkTypeMacro(vtkTDxDevice,vtkObject);

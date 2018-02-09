@@ -33,7 +33,6 @@
 
 #include "vtkGUISupportQtModule.h" // For export macro
 #include "QVTKWin32Header.h" // for VTKGUISUPPORTQT_EXPORT
-#include "vtkTDxConfigure.h" // defines VTK_USE_TDX
 
 #include <QApplication>
 

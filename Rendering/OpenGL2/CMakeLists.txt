@@ -5,12 +5,6 @@ endif()
 include(vtkOpenGL)
 include(vtkObjectFactory)
 
-
-# The TDx support has not been moved, this header is here to define nothing,
-# and so allow classes in other modules to safely include it and keep going.
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/vtkTDxConfigure.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/vtkTDxConfigure.h)
-
 set(Module_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/${vtk-module}ObjectFactory.cxx
   vtkCameraPass.cxx
@@ -100,7 +94,6 @@ endif()
 
 set(${vtk-module}_HDRS
   vtkOpenGL.h
-  ${CMAKE_CURRENT_BINARY_DIR}/vtkTDxConfigure.h
   ${CMAKE_CURRENT_BINARY_DIR}/vtkOpenGLError.h
   ${CMAKE_CURRENT_BINARY_DIR}/vtkRenderingOpenGLConfigure.h
   )

@@ -3,16 +3,6 @@ if(TARGET vtkRenderingOpenGL2)
   message(FATAL_ERROR "vtkRenderingOpenGL cannot be built with vtkRenderingOpenGL2, please disable one of them.")
 endif()
 
-# FIXME: The TDx support needs some refactoring before we can build it in a
-# modular fashion, for now it must remain an option on vtkRenderingOpenGL.
-option(VTK_USE_TDX "Use TDx interaction devices" OFF)
-mark_as_advanced(VTK_USE_TDX)
-if (TDX_INCLUDE_DIR)
-  include_directories(${TDX_INCLUDE_DIR})
-endif()
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/vtkTDxConfigure.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/vtkTDxConfigure.h)
-
 include(vtkObjectFactory)
 
 set(Module_SRCS
@@ -109,27 +99,9 @@ if (NOT VTK_LEGACY_REMOVE)
     vtkOpenGLPolyDataMapper.cxx)
 endif()
 
-if(VTK_USE_TDX)
-  list(APPEND Module_SRCS
-    vtkTDxDevice.cxx
-    vtkTDxInteractorStyleGeo.cxx)
-
-  if(WIN32)
-   list(APPEND Module_SRCS vtkTDxWinDevice.cxx)
-  endif()
-  if(UNIX)
-    list(APPEND Module_SRCS vtkTDxUnixDevice.cxx)
-  endif()
-  if(APPLE)
-    list(APPEND Module_SRCS vtkTDxMacDevice.cxx)
-  endif()
-endif()
-
-
 set(${vtk-module}_HDRS
   vtkgluPickMatrix.h
   vtkOpenGL.h
-  ${CMAKE_CURRENT_BINARY_DIR}/vtkTDxConfigure.h
   ${CMAKE_CURRENT_BINARY_DIR}/vtkRenderingOpenGLConfigure.h
   ${CMAKE_CURRENT_BINARY_DIR}/vtkgl.h
   ${CMAKE_CURRENT_BINARY_DIR}/vtkOpenGLError.h

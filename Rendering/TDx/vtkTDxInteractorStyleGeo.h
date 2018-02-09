@@ -28,12 +28,12 @@
 #ifndef vtkTDxInteractorStyleGeo_h
 #define vtkTDxInteractorStyleGeo_h
 
-#include "vtkRenderingOpenGLModule.h" // For export macro
+#include "vtkRenderingTDxModule.h" // For export macro
 #include "vtkTDxInteractorStyle.h"
 
 class vtkTransform;
 
-class VTKRENDERINGOPENGL_EXPORT vtkTDxInteractorStyleGeo : public vtkTDxInteractorStyle
+class VTKRENDERINGTDX_EXPORT vtkTDxInteractorStyleGeo : public vtkTDxInteractorStyle
 {
 public:
   static vtkTDxInteractorStyleGeo *New();

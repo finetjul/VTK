@@ -193,7 +193,7 @@ public:
     if (firstTime)
     {
       writer->PutBits("1001000000001010");
-      firstTime = false;
+      //firstTime = false;
     }
     else
     {

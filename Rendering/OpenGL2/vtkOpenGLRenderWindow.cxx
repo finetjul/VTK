@@ -1987,11 +1987,15 @@ int vtkOpenGLRenderWindow::CreateHardwareOffScreenBuffers(int width, int height,
   this->HardwareBufferSize[1] = 0;
 
   int glMajorVersion = 2;
+  bool fbEXT = false;
+  bool fbARB = false;
+  bool fbCore = true;
 #if GL_ES_VERSION_3_0 != 1
   glGetIntegerv(GL_MAJOR_VERSION, & glMajorVersion);
-  if (glMajorVersion < 3 &&
-    !glewIsSupported("GL_EXT_framebuffer_object") &&
-    !glewIsSupported("GL_ARB_framebuffer_object"))
+  fbCore = glMajorVersion >= 3;
+  fbEXT = !fbCore && glewIsSupported("GL_EXT_framebuffer_object");
+  fbARB = !fbCore && glewIsSupported("GL_ARB_framebuffer_object");
+  if (!fbCore && !fbEXT && !fbARB)
   {
     vtkDebugMacro( << " extension GL_EXT_framebuffer_object is not supported. "
       "Hardware accelerated offscreen rendering is not available" );
@@ -2010,6 +2014,27 @@ int vtkOpenGLRenderWindow::CreateHardwareOffScreenBuffers(int width, int height,
     this->NumberOfFrameBuffers = 2;
   }
 #endif
+
+  if (fbEXT)
+  {
+    glBindFramebuffer = glBindFramebufferEXT;
+    glBindRenderbuffer = glBindRenderbufferEXT;
+    glCheckFramebufferStatus = glCheckFramebufferStatusEXT;
+    glDeleteFramebuffers = glDeleteFramebuffersEXT;
+    glDeleteRenderbuffers = glDeleteRenderbuffersEXT;
+    glFramebufferRenderbuffer = glFramebufferRenderbufferEXT;
+    glFramebufferTexture1D = glFramebufferTexture1DEXT;
+    glFramebufferTexture2D = glFramebufferTexture2DEXT;
+    glFramebufferTexture3D = glFramebufferTexture3DEXT;
+    glGenFramebuffers = glGenFramebuffersEXT;
+    glGenRenderbuffers = glGenRenderbuffersEXT;
+    glGenerateMipmap = glGenerateMipmapEXT;
+    glGetFramebufferAttachmentParameteriv = glGetFramebufferAttachmentParameterivEXT;
+    glGetRenderbufferParameteriv = glGetRenderbufferParameterivEXT;
+    glIsFramebuffer = glIsFramebufferEXT;
+    glIsRenderbuffer = glIsRenderbufferEXT;
+    glRenderbufferStorage = glRenderbufferStorageEXT;
+  }
 
   // Up to 2 for stereo
   GLuint textureObjects[2] = { 0, 0 };

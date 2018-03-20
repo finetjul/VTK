@@ -1070,8 +1070,6 @@ int vtkOpenGLRenderer::GetPickedIds(unsigned int atMost,
   return k;
 }
 
-}
-
 const char *vtkOpenGLRenderer::GetLightingUniforms()
 {
   return this->LightingDeclaration.c_str();
@@ -1146,7 +1144,7 @@ void vtkOpenGLRenderer::UpdateLightingUniforms(vtkShaderProgram *program)
         double *lfp = light->GetTransformedFocalPoint();
         double *lp = light->GetTransformedPosition();
         double lightDir[3];
-        vtkMath::Subtract(lfp,lp,lightDir);
+        vtkMath::Subtract(lfp, lp, lightDir);
         vtkMath::Normalize(lightDir);
         double *tDir = viewTF->TransformNormal(lightDir);
         lightDirection[0] = tDir[0];
@@ -1182,3 +1180,4 @@ void vtkOpenGLRenderer::UpdateLightingUniforms(vtkShaderProgram *program)
   }
 
   program->SetUniformGroupUpdateTime(vtkShaderProgram::LightingGroup, ltime);
+}

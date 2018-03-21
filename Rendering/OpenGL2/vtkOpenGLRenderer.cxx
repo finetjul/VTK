@@ -1070,8 +1070,6 @@ int vtkOpenGLRenderer::GetPickedIds(unsigned int atMost,
   return k;
 }
 
-}
-
 const char *vtkOpenGLRenderer::GetLightingUniforms()
 {
   return this->LightingDeclaration.c_str();

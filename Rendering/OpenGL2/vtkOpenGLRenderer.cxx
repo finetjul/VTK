@@ -1180,3 +1180,4 @@ void vtkOpenGLRenderer::UpdateLightingUniforms(vtkShaderProgram *program)
   }
 
   program->SetUniformGroupUpdateTime(vtkShaderProgram::LightingGroup, ltime);
+}

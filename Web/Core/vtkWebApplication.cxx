@@ -130,6 +130,19 @@ vtkWebApplication::~vtkWebApplication()
 }
 
 //----------------------------------------------------------------------------
+void vtkWebApplication::SetNumberOfEncoderThreads(vtkTypeUInt32 numThreads)
+{
+  this->Internals->Encoder->SetMaxThreads(numThreads);
+  this->Internals->Encoder->Initialize();
+}
+
+//----------------------------------------------------------------------------
+vtkTypeUInt32 vtkWebApplication::GetNumberOfEncoderThreads()
+{
+  return this->Internals->Encoder->GetMaxThreads();
+}
+
+//----------------------------------------------------------------------------
 bool vtkWebApplication::GetHasImagesBeingProcessed(vtkRenderWindow* view)
 {
   const vtkInternals::ImageCacheValueType& value = this->Internals->ImageCache[view];
@@ -400,7 +413,7 @@ const char* vtkWebApplication::GetWebGLBinaryData(
     return nullptr;
   }
 
-  if(this->Internals->WebGLExporterObjIdMap[webglExporter].size() > 0 &&
+  if(!this->Internals->WebGLExporterObjIdMap[webglExporter].empty() &&
     this->Internals->WebGLExporterObjIdMap[webglExporter].find(id) !=
     this->Internals->WebGLExporterObjIdMap[webglExporter].end())
   {

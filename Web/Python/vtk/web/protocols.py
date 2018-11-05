@@ -143,7 +143,7 @@ class vtkWebViewPort(vtkWebProtocol):
         RPC callback to reset camera.
         """
         view = self.getView(viewId)
-        camera = view.GetRenderer().GetActiveCamera()
+        camera = view.GetRenderers().GetFirstRenderer().GetActiveCamera()
         camera.ResetCamera()
         try:
             # FIXME seb: view.CenterOfRotation = camera.GetFocalPoint()
@@ -186,10 +186,10 @@ class vtkWebViewPort(vtkWebProtocol):
     def updateCamera(self, view_id, focal_point, view_up, position):
         view = self.getView(view_id)
 
-        camera = view.GetRenderer().GetActiveCamera()
+        camera = view.GetRenderers().GetFirstRenderer().GetActiveCamera()
         camera.SetFocalPoint(focal_point)
-        camera.SetCameraViewUp(view_up)
-        camera.SetCameraPosition(position)
+        camera.SetViewUp(view_up)
+        camera.SetPosition(position)
         self.getApplication().InvalidateCache(view)
 
         self.getApplication().InvokeEvent('UpdateEvent')

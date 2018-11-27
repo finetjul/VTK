@@ -39,6 +39,7 @@
 #include "vtkGUISupportQtModule.h" // For export macro
 #include "QVTKWin32Header.h"
 #include <QtCore/QObject>
+#include <QtCore/QMap>
 
 class vtkRenderWindowInteractor;
 class QEvent;
@@ -65,6 +66,12 @@ public:
   int GetDevicePixelRatio() { return this->DevicePixelRatio; }
 
   // Description:
+  // Adds a new mapping from Qt point id to VTK pointer index if needed.
+  // Returns the inserted VTK index or -1 in case of failure.
+  int UpdateTouchPointIdMap(const int qtPointId);
+  int GetPointerIndex(int qtPointId) const;
+
+  // Description:
   // Process a QEvent and send it to the interactor
   // returns whether the event was recognized and processed
   bool ProcessEvent(QEvent* e, vtkRenderWindowInteractor* iren);
@@ -72,6 +79,7 @@ public:
 protected:
   int AccumulatedDelta;
   int DevicePixelRatio;
+  QMap<int, int> TouchPointIdMap;
 };
 
 #endif

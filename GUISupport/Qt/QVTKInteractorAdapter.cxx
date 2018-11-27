@@ -49,6 +49,7 @@ static const char* qt_key_to_key_sym(Qt::Key, Qt::KeyboardModifiers modifiers);
 
 QVTKInteractorAdapter::QVTKInteractorAdapter(QObject* parentObject)
   : QObject(parentObject), AccumulatedDelta(0), DevicePixelRatio(1)
+  , TouchPointIdMap()
 {
 }
 
@@ -75,6 +76,29 @@ void QVTKInteractorAdapter::SetDevicePixelRatio(int ratio, vtkRenderWindowIntera
     }
     this->DevicePixelRatio = ratio;
   }
+}
+
+int QVTKInteractorAdapter::UpdateTouchPointIdMap(const int qtPointId)
+{
+  int pointerIndex = this->TouchPointIdMap.value(qtPointId, -1);
+  if (pointerIndex != -1)
+  {
+    return pointerIndex;
+  }
+  for (pointerIndex = 0; pointerIndex < VTKI_MAX_POINTERS; ++pointerIndex)
+  {
+    if (this->TouchPointIdMap.key(pointerIndex, -1) == -1)
+    {
+      this->TouchPointIdMap.insert(qtPointId, pointerIndex);
+      break;
+    }
+  }
+  return pointerIndex < VTKI_MAX_POINTERS ? pointerIndex : -1;
+}
+
+int QVTKInteractorAdapter::GetPointerIndex(int qtPointId) const
+{
+  return this->TouchPointIdMap.value(qtPointId, -1);
 }
 
 bool QVTKInteractorAdapter::ProcessEvent(QEvent* e, vtkRenderWindowInteractor* iren)
@@ -189,35 +213,36 @@ bool QVTKInteractorAdapter::ProcessEvent(QEvent* e, vtkRenderWindowInteractor* i
     QTouchEvent* e2 = dynamic_cast<QTouchEvent*>(e);
     foreach (const QTouchEvent::TouchPoint& point, e2->touchPoints())
     {
-      if (point.id() >= VTKI_MAX_POINTERS)
+      int pointerIndex = this->UpdateTouchPointIdMap(point.id());
+      if (pointerIndex < VTKI_MAX_POINTERS)
       {
-        break;
+        // give interactor the event information
+        iren->SetEventInformationFlipY(point.pos().x() * this->DevicePixelRatio,
+          point.pos().y() * this->DevicePixelRatio,
+          (e2->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0,
+          (e2->modifiers() & Qt::ShiftModifier) > 0 ? 1 : 0,
+          0, 0, 0, pointerIndex);
       }
-      // give interactor the event information
-      iren->SetEventInformationFlipY(point.pos().x() * this->DevicePixelRatio,
-                                     point.pos().y() * this->DevicePixelRatio,
-                                      (e2->modifiers() & Qt::ControlModifier) > 0 ? 1 : 0,
-                                      (e2->modifiers() & Qt::ShiftModifier ) > 0 ? 1 : 0,
-                                      0,0,0, point.id());
     }
     foreach (const QTouchEvent::TouchPoint& point, e2->touchPoints())
     {
-      if (point.id() >= VTKI_MAX_POINTERS)
+      int pointerIndex = this->GetPointerIndex(point.id());
+      if (pointerIndex < VTKI_MAX_POINTERS)
       {
-        break;
-      }
-      iren->SetPointerIndex(point.id());
-      if (point.state() & Qt::TouchPointReleased)
-      {
-        iren->InvokeEvent(vtkCommand::LeftButtonReleaseEvent,nullptr);
-      }
-      if (point.state() & Qt::TouchPointPressed)
-      {
-        iren->InvokeEvent(vtkCommand::LeftButtonPressEvent,nullptr);
-      }
-      if (point.state() & Qt::TouchPointMoved)
-      {
-        iren->InvokeEvent(vtkCommand::MouseMoveEvent, nullptr);
+        iren->SetPointerIndex(pointerIndex);
+        if (point.state() & Qt::TouchPointReleased)
+        {
+          iren->InvokeEvent(vtkCommand::LeftButtonReleaseEvent, nullptr);
+          this->TouchPointIdMap.remove(point.id());
+        }
+        if (point.state() & Qt::TouchPointPressed)
+        {
+          iren->InvokeEvent(vtkCommand::LeftButtonPressEvent, nullptr);
+        }
+        if (point.state() & Qt::TouchPointMoved)
+        {
+          iren->InvokeEvent(vtkCommand::MouseMoveEvent, nullptr);
+        }
       }
     }
     e2->accept();

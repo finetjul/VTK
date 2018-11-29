@@ -770,8 +770,8 @@ double vtkCellPicker::IntersectVolumeWithLine(const double p1[3],
                                                 vtkProp3D *prop,
                                                 vtkAbstractVolumeMapper *mapper)
 {
-  vtkImageData *data = vtkImageData::SafeDownCast(mapper->GetDataSetInput());
-
+  vtkImageData *data = mapper != nullptr ?
+    vtkImageData::SafeDownCast(mapper->GetDataSetInput()) : nullptr;
   if (data == nullptr)
   {
     // This picker only works with image inputs
@@ -1050,7 +1050,13 @@ double vtkCellPicker::IntersectImageWithLine(const double p1[3],
                                              vtkImageMapper3D *imageMapper)
 {
   // Get the image information
-  vtkImageData *data = imageMapper->GetInput();
+  vtkImageData *data = imageMapper != nullptr ?
+    imageMapper->GetInput() : nullptr;
+  if (data == nullptr)
+  {
+    return VTK_DOUBLE_MAX;
+  }
+
   double spacing[3], origin[3];
   int extent[6];
   data->GetSpacing(spacing);

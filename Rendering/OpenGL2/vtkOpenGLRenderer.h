@@ -32,6 +32,7 @@ class vtkRenderPass;
 class vtkOpenGLTexture;
 class vtkTextureObject;
 class vtkDepthPeelingPass;
+class vtkShaderProgram;
 class vtkShadowMapPass;
 
 class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLRenderer : public vtkRenderer
@@ -92,6 +93,30 @@ public:
    * of vtkDepthPeelingPass.
    */
   bool IsDualDepthPeelingSupported();
+
+  // get the standard lighting uniform declarations
+  // for the current set of lights
+  const char *GetLightingUniforms();
+
+  // update the lighting uniforms for this shader if they
+  // are out of date
+  void UpdateLightingUniforms(vtkShaderProgram *prog);
+
+  // get the complexity of the current lights as a int
+  // 0 = no lighting
+  // 1 = headlight
+  // 2 = directional lights
+  // 3 = positional lights
+  enum LightingComplexityEnum {
+    NoLighting = 0,
+    Headlight = 1,
+    Direcitonal = 2,
+    Positional = 3
+  };
+  vtkGetMacro(LightingComplexity, int);
+
+  // get the number of lights turned on
+  vtkGetMacro(LightingCount, int);
 
 protected:
   vtkOpenGLRenderer();
@@ -157,6 +182,11 @@ protected:
 
   bool HaveApplePrimitiveIdBugValue;
   bool HaveApplePrimitiveIdBugChecked;
+
+  std::string LightingDeclaration;
+  int LightingComplexity;
+  int LightingCount;
+  vtkMTimeType LightingUpdateTime;
 
 private:
   vtkOpenGLRenderer(const vtkOpenGLRenderer&) = delete;

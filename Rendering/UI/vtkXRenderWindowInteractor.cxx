@@ -551,6 +551,7 @@ void vtkXRenderWindowInteractor::UpdateSize(int x, int y)
     this->Size[0] = x;
     this->Size[1] = y;
     this->RenderWindow->SetSize(x, y);
+    this->InvokeEvent(vtkCommand::WindowResizeEvent);
   }
 }
 
@@ -564,6 +565,7 @@ void vtkXRenderWindowInteractor::UpdateSizeNoXResize(int x, int y)
     this->Size[1] = y;
     // change the ivars but don't resize the X window
     this->RenderWindow->vtkRenderWindow::SetSize(x, y);
+    this->InvokeEvent(vtkCommand::WindowResizeEvent);
   }
 }
 

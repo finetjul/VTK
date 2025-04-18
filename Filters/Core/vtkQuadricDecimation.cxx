@@ -59,6 +59,7 @@ vtkQuadricDecimation::vtkQuadricDecimation()
   this->TargetPoints = vtkDoubleArray::New();
 
   this->TargetReduction = 0.9;
+  this->MaximumError = VTK_DOUBLE_MAX;
   this->NumberOfEdgeCollapses = 0;
   this->NumberOfComponents = 0;
 
@@ -334,7 +335,8 @@ int vtkQuadricDecimation::RequestData(vtkInformation* vtkNotUsed(request),
 
   bool abort = false;
   while (
-    !abort && edgeId >= 0 && cost < VTK_DOUBLE_MAX && this->ActualReduction < this->TargetReduction)
+    !abort && edgeId >= 0 && cost < this->MaximumError &&
+    this->ActualReduction < this->TargetReduction)
   {
     if (!(this->NumberOfEdgeCollapses % 10000))
     {

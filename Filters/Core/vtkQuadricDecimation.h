@@ -200,6 +200,25 @@ public:
   vtkGetMacro(TensorsWeight, double);
   ///@}
 
+  
+  ///@{
+  /**
+   * Set/Get the maximum error of the attribute.
+   * This is used as a stopping criteria for the decimation process.
+   */
+  vtkSetMacro(ScalarsMaximumError, double);
+  vtkSetMacro(VectorsMaximumError, double);
+  vtkSetMacro(NormalsMaximumError, double);
+  vtkSetMacro(TCoordsMaximumError, double);
+  vtkSetMacro(TensorsMaximumError, double);
+  vtkGetMacro(ScalarsMaximumError, double);
+  vtkGetMacro(VectorsMaximumError, double);
+  vtkGetMacro(NormalsMaximumError, double);
+  vtkGetMacro(TCoordsMaximumError, double);
+  vtkGetMacro(TensorsMaximumError, double);
+  ///@}
+
+
   ///@{
   /**
    * Get the actual reduction. This value is only valid after the
@@ -226,7 +245,7 @@ protected:
   void InitializeQuadrics(vtkIdType numPts);
 
   /**
-   * Free boundary edges are weighted
+   * Free boundary edges are MaximumErrored
    */
   void AddBoundaryConstraints();
 
@@ -249,6 +268,12 @@ protected:
   double ComputeCost(vtkIdType edgeId, double* x);
   double ComputeCost2(vtkIdType edgeId, double* x);
   ///@}
+
+  /**
+   * Compute the partial cost for each attribute type to verify if the error
+   * is above the user defined threshold for this attribute.
+   */
+  bool IsAboveAttributeThreshold(double* x) const;
 
   /**
    * Find all edges that will have an endpoint change ids because of an edge
@@ -326,6 +351,12 @@ protected:
   double NormalsWeight;
   double TCoordsWeight;
   double TensorsWeight;
+
+  double ScalarsMaximumError = VTK_DOUBLE_MAX;
+  double VectorsMaximumError = VTK_DOUBLE_MAX;
+  double NormalsMaximumError = VTK_DOUBLE_MAX;
+  double TCoordsMaximumError = VTK_DOUBLE_MAX;
+  double TensorsMaximumError = VTK_DOUBLE_MAX;
 
   int NumberOfEdgeCollapses;
   vtkEdgeTable* Edges;

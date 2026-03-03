@@ -1065,6 +1065,63 @@ double vtkQuadricDecimation::ComputeCost(vtkIdType edgeId, double* x)
 }
 
 //------------------------------------------------------------------------------
+bool vtkQuadricDecimation::IsAboveAttributeThreshold(double* x) const
+{
+  constexpr int type_count = 5;
+  const double typeThresholds[type_count] = {
+    this->ScalarsMaximumError,
+    this->VectorsMaximumError,
+    this->NormalsMaximumError,
+    this->TCoordsMaximumError,
+    this->TensorsMaximumError,
+  };
+  const int typeStart[type_count] = {
+    0, // Scalars
+    this->AttributeComponents[0], // Vectors
+    this->AttributeComponents[1], // Normals
+    this->AttributeComponents[2], // TCoords
+    this->AttributeComponents[3], // Tensors
+  };
+  const int typeEnd[type_count] = {
+    this->AttributeComponents[0], // Scalars
+    this->AttributeComponents[1], // Vectors
+    this->AttributeComponents[2], // Normals
+    this->AttributeComponents[3], // TCoords
+    this->AttributeComponents[4], // Tensors
+  };
+
+  for (int t = 0; t < type_count; t++)
+  {
+    if (typeThresholds[t] >= VTK_DOUBLE_MAX)
+    {
+      continue;
+    }
+    if (typeStart[t] == typeEnd[t])
+    {
+      continue; // attribute type not present
+    }
+
+    // Accumulate partial cost over all components of this type.
+    double partialCost = 0.0;
+    for (int ci = typeStart[t]; ci < typeEnd[t]; ci++)
+    {
+      int xi = 3 + ci;
+      partialCost +=
+          this->TempA[xi][xi] * x[xi] * x[xi]
+        - 2.0 * this->TempB[xi] * x[xi]
+        + 2.0 * (  this->TempA[0][xi] * x[0]
+                  + this->TempA[1][xi] * x[1]
+                  + this->TempA[2][xi] * x[2]) * x[xi];
+    }
+
+    if (partialCost > typeThresholds[t]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+//------------------------------------------------------------------------------
 double vtkQuadricDecimation::ComputeCost2(vtkIdType edgeId, double* x)
 {
   // this function is so ugly because the functionality of converting an QEM
@@ -1303,6 +1360,14 @@ double vtkQuadricDecimation::ComputeCost2(vtkIdType edgeId, double* x)
   }
 
   cost += this->TempQuad[9];
+
+  if (this->AttributeErrorMetric)
+  {
+    if (this->IsAboveAttributeThreshold(x))
+    {
+      cost = VTK_DOUBLE_MAX;
+    }
+  }
 
   return cost;
 }
@@ -1591,5 +1656,11 @@ void vtkQuadricDecimation::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Normals Weight: " << this->NormalsWeight << "\n";
   os << indent << "TCoords Weight: " << this->TCoordsWeight << "\n";
   os << indent << "Tensors Weight: " << this->TensorsWeight << "\n";
+
+  os << indent << "Scalars Maximum Error: " << this->ScalarsMaximumError << "\n";
+  os << indent << "Vectors Maximum Error: " << this->VectorsMaximumError << "\n";
+  os << indent << "Normals Maximum Error: " << this->NormalsMaximumError << "\n";
+  os << indent << "TCoords Maximum Error: " << this->TCoordsMaximumError << "\n";
+  os << indent << "Tensors Maximum Error: " << this->TensorsMaximumError << "\n";
 }
 VTK_ABI_NAMESPACE_END
